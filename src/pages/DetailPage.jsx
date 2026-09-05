@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import "../App.css";
 
 function DetailPage() {
   const { id } = useParams();
@@ -49,27 +50,48 @@ function DetailPage() {
     return (
       <div className="detail-page">
         <p>Medicine not found.</p>
-        <Link to="/">Back to search</Link>
+        <Link to="/" className="back-link">
+          Back to search
+        </Link>
       </div>
     );
   }
 
   const brandName = medicine.openfda?.brand_name?.[0] || "Unknown";
   const genericName = medicine.openfda?.generic_name?.[0] || "Not available";
-  const manufacturer = medicine.openfda?.manufacturer_name?.[0] || "Not available";
-  const productType = medicine.openfda?.product_type?.[0] || "Not available";
-  const route = medicine.openfda?.route?.[0] || "Not available";
+  const manufacturer =
+    medicine.openfda?.manufacturer_name?.[0] || "Not available";
+  const productType = medicine.openfda?.product_type?.[0] || null;
+  const route = medicine.openfda?.route?.[0] || null;
   const substance = medicine.openfda?.substance_name?.[0] || "Not available";
 
   return (
     <div className="detail-page">
-      <Link to="/">&larr; Back to search</Link>
-      <h1>{brandName}</h1>
-      <p>Generic name: {genericName}</p>
-      <p>Manufacturer: {manufacturer}</p>
-      <p>Product type: {productType}</p>
-      <p>Route: {route}</p>
-      <p>Active substance: {substance}</p>
+      <Link to="/" className="back-link">
+        &larr; Back to search
+      </Link>
+
+      <div className="detail-card">
+        <h1>{brandName}</h1>
+
+        <div className="tag-row">
+          {productType && <span className="tag tag-red">{productType}</span>}
+          {route && <span className="tag tag-blue">{route}</span>}
+        </div>
+
+        <div className="detail-row">
+          <span className="detail-label">Generic name</span>
+          <span>{genericName}</span>
+        </div>
+        <div className="detail-row">
+          <span className="detail-label">Manufacturer</span>
+          <span>{manufacturer}</span>
+        </div>
+        <div className="detail-row">
+          <span className="detail-label">Active substance</span>
+          <span>{substance}</span>
+        </div>
+      </div>
     </div>
   );
 }
