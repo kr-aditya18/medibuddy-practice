@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
 import useDebounce from "../hooks/useDebounce";
+import ResultsGrid from "../components/ResultsGrid";
 import "../App.css";
 
 function SearchPage() {
@@ -114,46 +114,26 @@ function SearchPage() {
         <button onClick={handleSearchClick}>Search</button>
       </div>
 
-      {loading && <p>Loading...</p>}
+      {loading && <p className="status-text">Loading...</p>}
 
-      {error && <p>{error}</p>}
+      {error && <p className="status-text">{error}</p>}
 
       {!loading && !error && hasSearched && medicines.length === 0 && (
-        <p>No results found. Try a different medicine name.</p>
+        <p className="status-text">
+          No results found. Try a different medicine name.
+        </p>
       )}
 
-      <div className="medicine-grid">
-        {medicines.map((medicine, index) => {
-          const brandName =
-            medicine.openfda?.brand_name?.[0] || "Unknown";
+      {!loading && medicines.length > 0 && (
+        <div className="results-header">
+          <h2>Results for "{query}"</h2>
+          <span className="results-count">
+            {medicines.length} formulations found
+          </span>
+        </div>
+      )}
 
-          const genericName =
-            medicine.openfda?.generic_name?.[0] || "Not available";
-
-          const manufacturer =
-            medicine.openfda?.manufacturer_name?.[0] ||
-            "Not available";
-
-          const productType =
-            medicine.openfda?.product_type?.[0] ||
-            "Not available";
-
-          return (
-            <Link
-              to={`/medicine/${medicine.id}`}
-              key={index}
-              className="medicine-card-link"
-            >
-              <div className="medicine-card">
-                <h3>{brandName}</h3>
-                <p>Generic: {genericName}</p>
-                <p>Manufacturer: {manufacturer}</p>
-                <p>Product Type: {productType}</p>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+      <ResultsGrid medicines={medicines} />
     </div>
   );
 }
