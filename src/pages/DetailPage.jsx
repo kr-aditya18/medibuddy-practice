@@ -38,16 +38,16 @@ function DetailPage() {
   }, [id]);
 
   if (loading) {
-    return <p style={{ padding: "40px" }}>Loading...</p>;
+    return <p className="detail-page">Loading...</p>;
   }
 
   if (error) {
-    return <p style={{ padding: "40px" }}>{error}</p>;
+    return <p className="detail-page">{error}</p>;
   }
 
   if (!medicine) {
     return (
-      <div style={{ padding: "40px" }}>
+      <div className="detail-page">
         <p>Medicine not found.</p>
         <Link to="/">Back to search</Link>
       </div>
@@ -62,7 +62,7 @@ function DetailPage() {
   const substance = medicine.openfda?.substance_name?.[0] || "Not available";
 
   return (
-    <div style={{ padding: "40px", maxWidth: "700px", margin: "0 auto" }}>
+    <div className="detail-page">
       <Link to="/">&larr; Back to search</Link>
       <h1>{brandName}</h1>
       <p>Generic name: {genericName}</p>

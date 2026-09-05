@@ -32,6 +32,14 @@ function SearchPage() {
 
       const response = await fetch(url);
 
+      if (response.status === 404) {
+        // FDA API returns 404 when nothing matches, not a real error
+        setMedicines([]);
+        sessionStorage.setItem("lastQuery", query);
+        sessionStorage.setItem("lastResults", JSON.stringify([]));
+        return;
+      }
+
       if (!response.ok) {
         throw new Error("Failed to fetch medicines");
       }
