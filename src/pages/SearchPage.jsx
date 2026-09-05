@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import useDebounce from "../hooks/useDebounce";
 import "../App.css";
@@ -18,6 +18,7 @@ function SearchPage() {
   const [hasSearched, setHasSearched] = useState(false);
 
   const debouncedQuery = useDebounce(query, 500);
+  const cache = useRef({});
 
   async function performSearch(searchTerm) {
     if (!searchTerm.trim()) {
@@ -25,8 +26,16 @@ function SearchPage() {
     }
 
     setHasSearched(true);
-    setLoading(true);
     setError("");
+
+    const cacheKey = searchTerm.trim().toLowerCase();
+
+    if (cache.current[cacheKey]) {
+      setMedicines(cache.current[cacheKey]);
+      return;
+    }
+
+    setLoading(true);
 
     try {
       const url = `https://api.fda.gov/drug/label.json?search=openfda.brand_name:"${encodeURIComponent(
@@ -37,6 +46,7 @@ function SearchPage() {
 
       if (response.status === 404) {
         setMedicines([]);
+        cache.current[cacheKey] = [];
         sessionStorage.setItem("lastQuery", searchTerm);
         sessionStorage.setItem("lastResults", JSON.stringify([]));
         return;
@@ -49,6 +59,7 @@ function SearchPage() {
       const data = await response.json();
 
       setMedicines(data.results || []);
+      cache.current[cacheKey] = data.results || [];
       sessionStorage.setItem("lastQuery", searchTerm);
       sessionStorage.setItem(
         "lastResults",
