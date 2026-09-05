@@ -19,6 +19,7 @@ function SearchPage() {
 
   const debouncedQuery = useDebounce(query, 500);
   const cache = useRef({});
+  const abortRef = useRef(null);
 
   async function performSearch(searchTerm) {
     if (!searchTerm.trim()) {
@@ -35,6 +36,13 @@ function SearchPage() {
       return;
     }
 
+    if (abortRef.current) {
+      abortRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
 
     try {
@@ -42,7 +50,7 @@ function SearchPage() {
         searchTerm
       )}"&limit=20`;
 
-      const response = await fetch(url);
+      const response = await fetch(url, { signal: controller.signal });
 
       if (response.status === 404) {
         setMedicines([]);
@@ -66,10 +74,15 @@ function SearchPage() {
         JSON.stringify(data.results || [])
       );
     } catch (error) {
+      if (error.name === "AbortError") {
+        return;
+      }
       setError("Unable to fetch medicines. Please try again.");
       setMedicines([]);
     } finally {
-      setLoading(false);
+      if (abortRef.current === controller) {
+        setLoading(false);
+      }
     }
   }
 
