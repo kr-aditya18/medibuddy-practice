@@ -14,12 +14,14 @@ function SearchPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
 
   async function handleSearch() {
     if (!query.trim()) {
       return;
     }
 
+    setHasSearched(true);
     setLoading(true);
     setError("");
 
@@ -68,6 +70,10 @@ function SearchPage() {
       {loading && <p>Loading...</p>}
 
       {error && <p>{error}</p>}
+
+      {!loading && !error && hasSearched && medicines.length === 0 && (
+        <p>No results found. Try a different medicine name.</p>
+      )}
 
       <div className="medicine-grid">
         {medicines.map((medicine, index) => {
