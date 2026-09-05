@@ -1,6 +1,6 @@
 # Medicine Search
 
-This is my submission for the MediBuddy machine coding round. It's a small React app where you can search for a medicine and see its details, using the FDA drug label API.
+My submission for the MediBuddy machine coding round. Search a medicine, see its details, using the FDA drug label API.
 
 ## Running it
 
@@ -9,25 +9,29 @@ npm install
 npm run dev
 ```
 
-It'll give you a localhost link in the terminal, just open that.
+Opens on localhost, terminal will give you the link.
 
-## What it does right now
+## What it does
 
-- You type a medicine's brand name (like "Advil") and hit search
-- Shows the matching medicines as cards - brand name, generic name, manufacturer, product type
-- Click on any card and it opens a detail page for that specific medicine
-- If you refresh the detail page or paste its link directly, it still works because it fetches the medicine again using its id, doesn't depend on the search page at all
-- If you go back from the detail page to search, your last search + results are still there (didn't want to make people search again every time they click back, so saved it in sessionStorage)
+- Search medicines by brand name, shows results as cards (brand, generic name, manufacturer, product type)
+- "No results found" message if search returns nothing
+- Click a card to see its detail page (works on refresh/direct link too, fetches by id)
+- Back to search keeps your last search + results (sessionStorage)
 
 ## What's left
 
-- No results / error messages are just plain text right now, need to make them look better
-- Search fires a request on literally every keystroke right now, need to add debounce
-- No caching yet, so searching the same thing twice = 2 API calls
-- If you type fast, an older slow response can overwrite a newer one, need to handle that
-- Overall UI is pretty bare bones, focused on getting stuff working first before making it look nice
+- Debounce search input
+- Cache repeated searches
+- Cancel stale requests
+- UI polish (bare bones right now on purpose)
 
-## Notes on some choices I made
+## React bits used
 
-- Using the `id` field from the FDA API for the detail page URL since every medicine label has one and it's unique, made the most sense for the "works on refresh" requirement
-- Went with sessionStorage instead of some global state setup for remembering the last search, felt like overkill to add context/redux for just this one thing
+- `useState` for query, results, loading, error, hasSearched
+- `useEffect` on the detail page to fetch data when the id in the url changes
+- `react-router-dom` (`Routes`, `Route`, `Link`, `useParams`) for the search page / detail page navigation
+
+## Notes
+
+- Detail page uses the medicine's `id` from the FDA API in the url, not any index-based id
+- sessionStorage instead of context/redux for remembering last search, simpler for what's needed here
