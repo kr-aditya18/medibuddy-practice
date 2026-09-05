@@ -1,9 +1,17 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import "../App.css";
 
 function SearchPage() {
-  const [query, setQuery] = useState("");
-  const [medicines, setMedicines] = useState([]);
+  const [query, setQuery] = useState(() => {
+    return sessionStorage.getItem("lastQuery") || "";
+  });
+
+  const [medicines, setMedicines] = useState(() => {
+    const saved = sessionStorage.getItem("lastResults");
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -29,6 +37,8 @@ function SearchPage() {
       const data = await response.json();
 
       setMedicines(data.results || []);
+      sessionStorage.setItem("lastQuery", query);
+      sessionStorage.setItem("lastResults", JSON.stringify(data.results || []));
     } catch (error) {
       setError("Unable to fetch medicines. Please try again.");
       setMedicines([]);
@@ -76,12 +86,18 @@ function SearchPage() {
             "Not available";
 
           return (
-            <div className="medicine-card" key={index}>
-              <h3>{brandName}</h3>
-              <p>Generic: {genericName}</p>
-              <p>Manufacturer: {manufacturer}</p>
-              <p>Product Type: {productType}</p>
-            </div>
+            <Link
+              to={`/medicine/${medicine.id}`}
+              key={index}
+              className="medicine-card-link"
+            >
+              <div className="medicine-card">
+                <h3>{brandName}</h3>
+                <p>Generic: {genericName}</p>
+                <p>Manufacturer: {manufacturer}</p>
+                <p>Product Type: {productType}</p>
+              </div>
+            </Link>
           );
         })}
       </div>
