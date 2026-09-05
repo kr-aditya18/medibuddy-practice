@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import useDebounce from "../hooks/useDebounce";
 import "../App.css";
 
 function SearchPage() {
@@ -16,8 +17,10 @@ function SearchPage() {
   const [error, setError] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
 
-  async function handleSearch() {
-    if (!query.trim()) {
+  const debouncedQuery = useDebounce(query, 500);
+
+  async function performSearch(searchTerm) {
+    if (!searchTerm.trim()) {
       return;
     }
 
@@ -27,15 +30,14 @@ function SearchPage() {
 
     try {
       const url = `https://api.fda.gov/drug/label.json?search=openfda.brand_name:"${encodeURIComponent(
-        query
+        searchTerm
       )}"&limit=20`;
 
       const response = await fetch(url);
 
       if (response.status === 404) {
-        // FDA API returns 404 when nothing matches, not a real error
         setMedicines([]);
-        sessionStorage.setItem("lastQuery", query);
+        sessionStorage.setItem("lastQuery", searchTerm);
         sessionStorage.setItem("lastResults", JSON.stringify([]));
         return;
       }
@@ -47,14 +49,27 @@ function SearchPage() {
       const data = await response.json();
 
       setMedicines(data.results || []);
-      sessionStorage.setItem("lastQuery", query);
-      sessionStorage.setItem("lastResults", JSON.stringify(data.results || []));
+      sessionStorage.setItem("lastQuery", searchTerm);
+      sessionStorage.setItem(
+        "lastResults",
+        JSON.stringify(data.results || [])
+      );
     } catch (error) {
       setError("Unable to fetch medicines. Please try again.");
       setMedicines([]);
     } finally {
       setLoading(false);
     }
+  }
+
+  useEffect(() => {
+    if (debouncedQuery.trim()) {
+      performSearch(debouncedQuery);
+    }
+  }, [debouncedQuery]);
+
+  function handleSearchClick() {
+    performSearch(query);
   }
 
   return (
@@ -72,7 +87,7 @@ function SearchPage() {
           onChange={(event) => setQuery(event.target.value)}
         />
 
-        <button onClick={handleSearch}>Search</button>
+        <button onClick={handleSearchClick}>Search</button>
       </div>
 
       {loading && <p>Loading...</p>}
